@@ -25,12 +25,9 @@ async def predict(req: Request) -> Any:
 
 
 if __name__ == "__main__":
-    with open('best_estimator_TfidfVectorizer_20000_LogisticRegression.joblib', 'rb') as fmodel, \
-         open('vectorizer_TfidfVectorizer_100000.pkl', 'rb') as fvec, \
-         open('mlb_100000.pkl', 'rb') as fmlb:
-        model = joblib.load(fmodel)
-        vectorizer = joblib.load(fvec)
-        mlb = joblib.load(fmlb)
+    model = joblib.load('models/best_estimator_TfidfVectorizer_80000_LogisticRegression.joblib')
+    vectorizer = joblib.load('models/vectorizer_TfidfVectorizer_100000.pkl')
+    mlb = joblib.load('models/mlb_100000.pkl')
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", required=True,
