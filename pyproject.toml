@@ -18,7 +18,8 @@ jupyter-notebook = [
 api = [
     "aiohttp (>=3.13.3,<4.0.0)",
     "fastapi (>=0.131.0,<0.132.0)",
-    "uvicorn (>=0.41.0,<0.42.0)"
+    "gunicorn (>=25.1.0,<26.0.0)",
+    "uvicorn (>=0.41.0,<0.42.0)",
 ]
 data-science = [
     "gensim (>=4.4.0,<5.0.0)",
@@ -32,12 +33,15 @@ data-science = [
 ]
 mlops = [
     "mlflow (>=3.10.0,<4.0.0)",
-    "wandb (>=0.25.0,<0.26.0)"
+    "wandb (>=0.25.0,<0.26.0)",
 ]
 misc = [
     "tqdm (>=4.67.3,<5.0.0)",
     "bs4 (>=0.0.2,<0.0.3)",
-    "pytz (>=2025.2,<2026.0)"
+    "pytz (>=2025.2,<2026.0)",
+]
+dev = [
+    "flake8 (>=7.3.0,<8.0.0)",
 ]
 all = [
     {include-group = "jupyter-notebook"},
@@ -45,6 +49,7 @@ all = [
     {include-group = "data-science"},
     {include-group = "mlops"},
     {include-group = "misc"},
+    {include-group = "dev"},
 ]
 
 
