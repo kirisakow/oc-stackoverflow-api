@@ -14,10 +14,12 @@ L'API HTTP sous FastAPI pour mon projet OpenClassrooms «Étiquetage des questio
 
 1. Démarrez le serveur FastAPI
 
-   - soit en local en exécutant `poetry run python ./local_server.py` ;
+   - Soit en local, en exécutant `python ./local_server.py --port 5555` (ou tout autre numéro de port).
 
-   - soit dans le cloud (Azure) avec le fichier `main.py`.
+     ⚠️ Notez qu'il est nécessaire de préfixer cette commande de `poetry run` si vous utilisez poetry.
 
-2. Ouvrez le notebook `requests.ipynb` et lancez une requête.
+   - Soit dans le cloud (sur Azure), en y déployant le fichier `main.py`.
+
+2. Ouvrez le notebook `ISAKOV_Kiril_3_notebook_API_Prediction_depl_sur_Azur_062025.ipynb` qui vous servira d'IHM sommaire pour lancer vos requêtes.
 
 [1]: https://python-poetry.org/docs/#installation
