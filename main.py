@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Tuple, Union
 from fastapi import FastAPI, Request
 import joblib
 
@@ -9,7 +9,11 @@ mlb = joblib.load('models/mlb_100000.pkl')
 app = FastAPI(description="L'API HTTP pour mon projet OpenClassrooms «Prédiction de l'étiquetage des questions Stackoverflow»", )
 
 
-def prediction(req_data: str) -> List[str]:
+def prediction(req_data: str,
+               model=model,
+               vectorizer=vectorizer,
+               mlb=mlb
+               ) -> Union[List[str], Tuple[str]]:
     result = model.predict(
         vectorizer.transform([req_data])
     )  # result = array([[0, 1, 1, 0, ...]])
