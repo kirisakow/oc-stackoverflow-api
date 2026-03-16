@@ -1,6 +1,6 @@
-# oc-stackoverflow-api
+# L'API HTTP sous FastAPI pour mon projet OpenClassrooms « Étiquetage automatique des questions Stack Overflow »
 
-L'API HTTP sous FastAPI pour mon projet OpenClassrooms «Étiquetage des questions Stackoverflow»
+https://github.com/kirisakow/oc-stackoverflow-api
 
 ## Installation
 
