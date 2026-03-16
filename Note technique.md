@@ -9,7 +9,7 @@ Ce document est une note technique qui présente une brève étude des approches
 - **Pipeline de codage des étapes d’élaboration du modèle** : Automatisation et standardisation des processus.
 - **Suivi de la performance en production** : Détection des drifts et maintenance des modèles.
 
-Le contexte du projet Stack Overflow, où la qualité des tags influence directement l’expérience utilisateur, rend ces pratiques essentielles pour garantir des prédictions fiables et évolutives.
+Dans le contexte de ce projet de l'étiquetage automatique des questions Stack Overflow, la qualité des tags influence directement l’expérience utilisateur, rend ces pratiques essentielles pour garantir des prédictions fiables et évolutives.
 
 ---
 
@@ -67,7 +67,7 @@ Un pipeline MLOps se décompose en plusieurs étapes clés, chacune pouvant êtr
 
 - **MLFlow** :
   - **Fonctionnalités** : Tracking des expérimentations, gestion des artefacts (modèles, métriques) ([documentation MLFlow][2]).
-  - **Cas d’usage** : Comparaison des modèles (e.g., LDA vs. BERT).
+  - **Cas d’usage** : Dans notre projet, nous avons utilisé MLFlow pour effectuer des runs répétés et comparer les performances des modèles LDA (approche non supervisée, notebook 3) et BERT (approche supervisée, notebook 4). L’interface MLFlow UI a permis de visualiser et sélectionner le modèle optimal.
   - **Exemple** :
     ```python
     with mlflow.start_run():
@@ -81,16 +81,17 @@ Un pipeline MLOps se décompose en plusieurs étapes clés, chacune pouvant êtr
 
 ### c) Déploiement
 
-- **FastAPI** :
-  - **Fonctionnalités** : Création d’APIs légères et performantes ([documentation FastAPI][3]).
-  - **Cas d’usage** : Déploiement du modèle de prédiction de tags.
+- **Serveur Git** : [GitHub][7].
+- **Plateforme cloud** : Azure.
+- **Serveur API HTTP** : [FastAPI][3], un framework pour des API HTTP légères et performantes.
+  - **Cas d’usage** : Une API HTTP de prédiction de tags en réponse à une question (voir l'implémentation dans `main.py` et `local_server.py`) accompagnée de tests unitaires (voir `test_main.py` et `test_local_server.py`) pour respecter les bonnes pratique de la profession et éviter des erreurs d'inattention.
   - **Exemple** :
     ```python
     from fastapi import FastAPI
     app = FastAPI()
     @app.post("/predict")
     def predict(text: str):
-        return {"tags": model.predict(text)}
+        return {"predicted_tags": model.predict(text)}
     ```
 
 - **Docker + Kubernetes** :
@@ -163,29 +164,77 @@ Un pipeline MLOps se décompose en plusieurs étapes clés, chacune pouvant êtr
 
 ### Architecture Proposée
 
+#### Architecture Actuelle (Implémentée dans le Projet)
+
+```
+Données Brutes (Stack Overflow - API/SQL)
+    ↓
+Nettoyage (Notebook 1 : suppression HTML, tokenization)
+    ↓
+(Feature engineering)
+    ↓
+Modèles (best model actuel : TfIdfClassifier x LogisticRegression)
+    ↓
+FastAPI (main.py) → Déploiement sur Azure
+    ↓
+Evidently AI + Prometheus (Monitoring à implémenter)
+```
+
+#### Piste d’Amélioration : Intégration de Kedro pour l’Industrialisation
+
+**Contexte** : Kedro n’a pas été utilisé dans ce projet, mais son adoption future permettrait de :
+
+1. **Structurer le prétraitement** (Notebook 1) en un pipeline reproductible :
+   - Définir des `nodes` pour chaque étape (nettoyage, tokenization).
+   - Versionner les jeux de données intermédiaires.
+
+2. **Standardiser l’extraction de features** (Notebook 2) :
+   - Intégrer BoW et Word2Vec dans des composants modulaires.
+   - Faciliter les mises à jour (e.g., ajout de nouveaux embeddings).
+
+3. **S’intégrer à MLFlow** :
+   - Lier les pipelines Kedro aux runs MLFlow pour un tracking complet.
+
+**Exemple d’Architecture avec Kedro** :
+
 ```
 Données Brutes (Stack Overflow)
     ↓
-Kedro Pipeline (Prétraitement → Features)
+[Kedro] Pipeline de Prétraitement (nodes : nettoyage → tokenization)
     ↓
-MLFlow (Tracking des Modèles)
+[Kedro] Extraction de Features (BoW, Word2Vec)
     ↓
-FastAPI (Déploiement sur Azure)
+[MLFlow] Entraînement & Tracking (Notebooks 3/4)
     ↓
-Evidently AI + Prometheus (Monitoring)
+FastAPI (main.py) → Déploiement Azure
 ```
+
+**Valeur Ajoutée** :
+- **Reproductibilité** : Réexécution garantie des étapes de nettoyage.
+- **Collaboration** : Séparation claire entre code (Kedro) et analyse (notebooks).
+- **Évolutivité** : Ajout facile de nouvelles étapes (e.g., lemmatization).
 
 ---
 
 ## Conclusion
 
-L’adoption d’une approche MLOps avec des outils comme **Kedro**, **MLFlow**, **Evidently AI** et **Prometheus** permet de :
+L’adoption d’une approche MLOps avec des outils comme **MLFlow**, **Evidently AI** et **Prometheus** permet de :
 
 - **Automatiser** les étapes clés du cycle de vie du modèle.
 - **Garantir** la reproductibilité et la scalabilité.
 - **Minimiser** les risques liés à la dégradation des performances en production.
 
-Pour le projet Stack Overflow, cette approche assurera que le système de suggestion de tags reste pertinent et fiable, même face à l’évolution des technologies et des tendances.
+Pour ce projet de l'étiquetage automatique des questions Stack Overflow, cette approche complète notre implémentation actuelle :
+- **MLFlow** a déjà été utilisé pour comparer les modèles LDA et BERT (notebooks 3 et 4).
+- **FastAPI** est déployé (fichiers `main.py` et `local_server.py`), mais l’ajout de **Prometheus** permettrait de monitorer son usage réel (temps de réponse, taux d’erreur).
+
+**Perspectives avec Kedro** :
+Bien que non utilisé dans ce projet, Kedro représente une piste d’industrialisation pour structurer le prétraitement (notebook 1) et l’extraction de features (notebook 2) en pipelines reproductibles. Son intégration future permettrait de :
+- **Standardiser** les étapes de nettoyage et feature engineering.
+- **Faciliter la collaboration** en séparant le code de production (Kedro) des analyses exploratoires (notebooks).
+- **S’intégrer à MLFlow** pour un tracking complet des données et modèles.
+
+Les outils présentés ici, qu’ils soient déjà implémentés (MLFlow, FastAPI) ou proposés en amélioration (Kedro, Prometheus), offrent une feuille de route pour industrialiser et pérenniser le système de suggestion de tags.
 
 ---
 
@@ -195,3 +244,4 @@ Pour le projet Stack Overflow, cette approche assurera que le système de sugges
 [4]: https://www.evidentlyai.com/documentation
 [5]: https://prometheus.io/docs/introduction/overview/
 [6]: https://grafana.com/docs/
+[7]: https://docs.github.com/actions
